@@ -1,0 +1,46 @@
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("//example/pipeline:defs.bzl", "sign_binary")
+
+# Definitions for the pipeline (ideally would be in a different BUILD file)
+filegroup(
+    name = "empty_label",
+    srcs = [],
+)
+
+# Create a binary using the given sources.
+#
+# NOTE: since there is no label_list_flag() in bazel,
+# I opted for label_flag for demonstration purposes. It
+# is possible to emulerate label_list_flag but it's quite
+# tedious.
+label_flag(
+    name = "cc_binary_src",
+    build_setting_default = ":empty_label",
+)
+
+label_flag(
+    name = "cc_binary_hdr",
+    build_setting_default = ":empty_label",
+)
+
+cc_library(
+    name = "binary_lib",
+    srcs = [":cc_binary_src"],
+    hdrs = [":cc_binary_hdr"],
+)
+
+cc_binary(
+    name = "binary",
+    deps = [":binary_lib"]
+)
+
+string_flag(
+    name = "sign_key",
+    build_setting_default = "",
+)
+
+sign_binary(
+    name = "signed_binary",
+    binary = ":binary",
+    key = ":sign_key",
+)
