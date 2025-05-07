@@ -1,4 +1,5 @@
 load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain")
+load("@rules_cc//cc:action_names.bzl", "OBJ_COPY_ACTION_NAME")
 load("//rules:pipeline.bzl",
     "pipeline_attr",
     "pipeline_entry_rule",
@@ -6,23 +7,16 @@ load("//rules:pipeline.bzl",
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 
 def _sign_binary(ctx):
-    cc_toolchain = find_cc_toolchain(ctx)
     out_binary = ctx.actions.declare_file(ctx.label.name)
-    sign_file = ctx.actions.declare_file(ctx.label.name + ".key")
-
     key = ctx.attr.key[BuildSettingInfo].value
-    ctx.actions.write(sign_file, "the key is: {}".format(key))
 
     ctx.actions.run(
-        executable = cc_toolchain.objcopy_executable,
-        inputs = [ctx.file.binary, sign_file],
+        executable = ctx.executable._tool,
+        inputs = [ctx.file.binary],
         outputs = [out_binary],
         arguments = [
-            "--add-section",
-            ".ot.key={}".format(sign_file.path),
-            "--set-section-flags",
-            ".ot.key=noload,readonly",
             ctx.file.binary.path,
+            key,
             out_binary.path,
         ]
     )
@@ -39,8 +33,12 @@ sign_binary = rule(
         "key": attr.label(
             mandatory = True,
         ),
+        "_tool": attr.label(
+            default = "//example/pipeline:sign_binary_tool",
+            executable = True,
+            cfg = "host",
+        )
     },
-    toolchains = ["@rules_cc//cc:toolchain_type"],
 )
 
 def _opentitan_binary_impl(ctx):
@@ -48,6 +46,19 @@ def _opentitan_binary_impl(ctx):
     return [DefaultInfo(
         files = binary_files.files,
     )]
+
+def _riscv32_transition_impl(settings, attr):
+    return {
+        "//command_line_option:platforms": "//toolchain:opentitan_platform",
+    }
+
+riscv32_transition = transition(
+    implementation = _riscv32_transition_impl,
+    inputs = [],
+    outputs = [
+        "//command_line_option:platforms",
+    ],
+)
 
 opentitan_binary = pipeline_entry_rule(
     implementation = _opentitan_binary_impl,
@@ -67,9 +78,15 @@ opentitan_binary = pipeline_entry_rule(
             flag = "//example/pipeline:cc_binary_hdr",
             allow_single_file = True,
         ),
+        "dep": pipeline_attr.label(
+            mandatory = True,
+            flag = "//example/pipeline:cc_binary_dep",
+        ),
         "key": pipeline_attr.string(
             mandatory = True,
             flag = "//example/pipeline:sign_key",
         ),
-    }
+    },
+    # Transition to a target platform.
+    cfg = riscv32_transition,
 )

@@ -1,0 +1,9 @@
+load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+
+# Rebuild by running
+# bazelisk run //:py_requirements.update
+compile_pip_requirements(
+    name = "py_requirements",
+    src = "pyproject.toml",
+    requirements_txt = "//:python-requirements.txt",
+)

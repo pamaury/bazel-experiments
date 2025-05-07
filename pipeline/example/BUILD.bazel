@@ -1,8 +1,22 @@
 load("//example/pipeline:defs.bzl", "opentitan_binary")
 
+cc_library(
+    name = "dep",
+    srcs = [],
+)
+
 opentitan_binary(
     name = "ot_binary",
     src = "main.c",
     hdr = "main.h",
+    dep = ":dep",
     key = "ds98d7r8u34h",
+)
+
+opentitan_binary(
+    name = "ot_binary2",
+    src = "main2.c",
+    hdr = "main.h",
+    dep = ":dep",
+    key = "dg89d76f9jdh",
 )

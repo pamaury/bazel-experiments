@@ -1,0 +1,17 @@
+# Copyright lowRISC contributors (OpenTitan project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+[project]
+name = "opentitan"
+version = "0.0.0"
+description = "Open-source hardware root-of-trust"
+requires-python = ">=3.10"
+
+dependencies = [
+  "lief==0.16",
+]
+
+[tool.setuptools]
+# This is actually not a python project, we just use pyproject.toml to manage dependencies.
+py-modules = []

@@ -1,10 +1,20 @@
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("//example/pipeline:defs.bzl", "sign_binary")
+load("@rules_python//python:py_binary.bzl", "py_binary")
 
 # Definitions for the pipeline (ideally would be in a different BUILD file)
 filegroup(
     name = "empty_label",
     srcs = [],
+)
+
+py_binary(
+  name = "sign_binary_tool",
+  srcs = ["sign.py"],
+  main = "sign.py",
+  deps = [
+      "@python_deps//lief",
+  ]
 )
 
 # Create a binary using the given sources.
@@ -23,10 +33,16 @@ label_flag(
     build_setting_default = ":empty_label",
 )
 
+label_flag(
+    name = "cc_binary_dep",
+    build_setting_default = ":empty_label",
+)
+
 cc_library(
     name = "binary_lib",
     srcs = [":cc_binary_src"],
     hdrs = [":cc_binary_hdr"],
+    deps = [":cc_binary_dep"],
 )
 
 cc_binary(
