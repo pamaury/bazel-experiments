@@ -1,0 +1,24 @@
+load("//example/pipeline:defs.bzl", "build_binary", "sign_binary")
+load("@rules_python//python:py_binary.bzl", "py_binary")
+
+py_binary(
+  name = "sign_binary_tool",
+  srcs = ["sign.py"],
+  main = "sign.py",
+  deps = [
+      "@python_deps//lief",
+  ]
+)
+
+# The implementation will receive all pipeline attributes from the
+# `opentitan_binary` call.
+build_binary(
+    name = "elf_binary",
+)
+
+# The pipeline entry rules will export this target. The implementation
+# will receive all pipeline attributes from the `opentitan_binary` call.
+sign_binary(
+    name = "signed_elf_binary",
+    binary = ":elf_binary",
+)

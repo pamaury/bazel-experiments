@@ -1,0 +1,12 @@
+package(default_visibility = ["//visibility:public"])
+
+load("//rules/pipeline:pipeline.bzl", "empty_attrs")
+
+empty_attrs(
+    name = "empty_attrs",
+)
+
+label_flag(
+    name = "attrs",
+    build_setting_default = ":empty_attrs",
+)
