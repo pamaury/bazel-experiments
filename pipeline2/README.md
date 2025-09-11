@@ -1,3 +1,6 @@
+See `example/` for an example graph.
+
+```py
 # Idea:
 
 # We define the pipeline entry rule, e.g.
@@ -111,3 +114,4 @@ my_pipeline_rule = pipeline_rule(
 # are two types of transitions:
 # - 'exec' transitions: we can create an exec+opentitan_binary_pipeline_leave_transition transition manually
 # - custom transitions: we can wrap them in a `pipeline_transition` macro which combines the two transitions.
+```
